@@ -317,5 +317,51 @@ var et_pb_box_shadow_elements = [];
 <script type="text/javascript" src="https://saawe.org.za/wp-content/themes/Divi/includes/builder/feature/dynamic-assets/assets/js/jquery.fitvids.js?ver=4.25.0" id="fitvids-js"></script>
 <script type="text/javascript" src="https://saawe.org.za/wp-content/themes/Divi/includes/builder/feature/dynamic-assets/assets/js/jquery.mobile.js?ver=4.25.0" id="jquery-mobile-js"></script>
 <script type="text/javascript" src="https://saawe.org.za/wp-content/themes/Divi/core/admin/js/common.js?ver=4.25.0" id="et-core-common-js"></script>
+<script>
+// ponytail: static mirror — Divi's AJAX posts to /wp-admin/admin-ajax.php, which does not
+// exist here. Intercept every contact-form submit (capture phase beats Divi's handler) and
+// POST to the n8n webhook instead.
+(function () {
+  var ENDPOINT = "https://primary-production-ff69.up.railway.app/webhook/saawe-contact";
+
+  document.addEventListener("submit", function (e) {
+    var form = e.target;
+    if (!form.matches("form.et_pb_contact_form")) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    var box = form.closest(".et_pb_contact_form_container").querySelector(".et-pb-contact-message");
+    var blank = Array.prototype.filter.call(
+      form.querySelectorAll('[data-required_mark="required"][data-original_id]'),
+      function (f) { return !f.value.trim(); }
+    );
+    if (blank.length) {
+      blank[0].focus();
+      box.innerHTML = "<p>Please fill in all required fields.</p>";
+      return;
+    }
+
+    var data = { page: location.href };
+    form.querySelectorAll("[data-original_id]").forEach(function (f) {
+      data[f.dataset.original_id] = f.value;
+    });
+
+    box.innerHTML = "<p>Sending&#8230;</p>";
+    fetch(ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    })
+      .then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        form.reset();
+        box.innerHTML = "<p>Thank you for contacting us. We will get back to you soon.</p>";
+      })
+      .catch(function () {
+        box.innerHTML = "<p>Sorry, sending failed. Please email us at <a href=\"mailto:info@saawe.org.za\">info@saawe.org.za</a>.</p>";
+      });
+  }, true);
+})();
+</script>
 </body>
 </html>
