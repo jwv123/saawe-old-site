@@ -320,9 +320,9 @@ var et_pb_box_shadow_elements = [];
 <script>
 // ponytail: static mirror — Divi's AJAX posts to /wp-admin/admin-ajax.php, which does not
 // exist here. Intercept every contact-form submit (capture phase beats Divi's handler) and
-// POST to the n8n webhook instead.
+// POST to the /api/send Vercel function instead.
 (function () {
-  var ENDPOINT = "https://primary-production-ff69.up.railway.app/webhook/saawe-contact";
+  var ENDPOINT = "/api/send";
 
   document.addEventListener("submit", function (e) {
     var form = e.target;

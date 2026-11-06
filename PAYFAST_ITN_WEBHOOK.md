@@ -5,8 +5,10 @@ classic hosted payment page (`https://www.payfast.co.za/eng/process`). Today
 `notify_url` points at the site homepage, so **nobody verifies or records
 payments server-side** — confirmations exist only as Payfast transaction
 emails and on the Payfast dashboard. This doc describes adding an n8n webhook
-as the `notify_url` so every payment is confirmed and logged, using the same
-pattern as the contact-form webhook (`https://primary-production-ff69.up.railway.app/webhook/saawe-contact`).
+as the `notify_url` so every payment is confirmed and logged. (The contact-form
+webhook that previously followed this pattern was retired 2026-11 — contact
+forms now POST to the `/api/send` Vercel function, which sends via the Resend
+API; see `api/send.js`.)
 
 ## What Payfast sends
 
